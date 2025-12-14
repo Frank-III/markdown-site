@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Copy, MessageSquare, Sparkles, Terminal, Code } from "lucide-react";
+import { Copy, MessageSquare, Sparkles } from "lucide-react";
 
 interface CopyPageDropdownProps {
   title: string;
@@ -63,21 +63,6 @@ export default function CopyPageDropdown({
       `Please analyze this article:\n\n${markdown}`,
     );
     window.open(`https://claude.ai/new?q=${encodedText}`, "_blank");
-    setIsOpen(false);
-  };
-
-  // Open Cursor MCP connection page
-  const handleConnectToCursor = () => {
-    window.open("https://cursor.sh/settings/mcp", "_blank");
-    setIsOpen(false);
-  };
-
-  // Open VS Code MCP connection page
-  const handleConnectToVSCode = () => {
-    window.open(
-      "https://marketplace.visualstudio.com/items?itemName=anthropics.claude-code",
-      "_blank",
-    );
     setIsOpen(false);
   };
 
@@ -150,34 +135,6 @@ export default function CopyPageDropdown({
               </span>
               <span className="copy-page-item-desc">
                 Ask questions about this page
-              </span>
-            </div>
-          </button>
-
-          {/* Connect to Cursor */}
-          <button className="copy-page-item" onClick={handleConnectToCursor}>
-            <Terminal size={16} className="copy-page-icon" />
-            <div className="copy-page-item-content">
-              <span className="copy-page-item-title">
-                Connect to Cursor
-                <span className="external-arrow">↗</span>
-              </span>
-              <span className="copy-page-item-desc">
-                Install MCP Server on Cursor
-              </span>
-            </div>
-          </button>
-
-          {/* Connect to VS Code */}
-          <button className="copy-page-item" onClick={handleConnectToVSCode}>
-            <Code size={16} className="copy-page-icon" />
-            <div className="copy-page-item-content">
-              <span className="copy-page-item-title">
-                Connect to VS Code
-                <span className="external-arrow">↗</span>
-              </span>
-              <span className="copy-page-item-desc">
-                Install MCP Server on VS Code
               </span>
             </div>
           </button>
