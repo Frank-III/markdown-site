@@ -1,15 +1,9 @@
 [build]
-  command = "npm ci --include=dev && npx convex deploy --cmd 'npm run build'"
-  publish = "dist"
+  command = "bun install && npx convex deploy --cmd 'bun run build'"
+  publish = "build"
 
 [build.environment]
   NODE_VERSION = "20"
-
-# SPA fallback for client-side routing (must be last)
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
 
 # Edge functions for dynamic Convex HTTP proxying
 # RSS feeds
@@ -35,11 +29,6 @@
   path = "/api/post"
   function = "api"
 
-# Open Graph bot detection (catches all other routes)
-[[edge_functions]]
-  path = "/*"
-  function = "botMeta"
-
 [context.production.environment]
   NODE_ENV = "production"
 
@@ -48,4 +37,3 @@
 
 [context.branch-deploy.environment]
   NODE_ENV = "development"
-
