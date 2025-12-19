@@ -36,6 +36,7 @@
     "@types/bun": "^1.1.14",
     "@types/node": "^22.10.2",
     "dotenv": "^16.4.5",
+    "mdsvex": "^0.12.3",
     "oxlint": "^0.15.0",
     "svelte": "^5.14.1",
     "svelte-check": "^4.1.1",
