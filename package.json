@@ -11,8 +11,10 @@
     "start": "bun run build/index.js",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "sync": "bunx tsx scripts/sync-posts.ts",
-    "sync:prod": "SYNC_ENV=production bunx tsx scripts/sync-posts.ts",
+    "lint": "oxlint --deny-warnings",
+    "lint:fix": "oxlint --fix",
+    "sync": "bun scripts/sync-posts.ts",
+    "sync:prod": "SYNC_ENV=production bun scripts/sync-posts.ts",
     "deploy": "bun run sync && bun run build",
     "deploy:prod": "bunx convex deploy && bun run sync:prod"
   },
@@ -31,11 +33,12 @@
     "@sveltejs/adapter-node": "^5.2.9",
     "@sveltejs/kit": "^2.10.0",
     "@sveltejs/vite-plugin-svelte": "^5.0.0",
+    "@types/bun": "^1.1.14",
     "@types/node": "^22.10.2",
     "dotenv": "^16.4.5",
+    "oxlint": "^0.15.0",
     "svelte": "^5.14.1",
     "svelte-check": "^4.1.1",
-    "tsx": "^4.7.1",
     "typescript": "^5.7.2",
     "vite": "^6.0.3"
   }
