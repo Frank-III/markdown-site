@@ -2,10 +2,12 @@
 	import { setupConvex, useConvexClient } from 'convex-svelte';
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
+	import { onNavigate } from '$app/navigation';
 	import { theme } from '$lib/stores/theme';
 	import { createPageTracker } from '$lib/stores/pageTracking';
 	import { api } from '$convex/_generated/api';
 	import Layout from '$lib/components/Layout.svelte';
+	import PageTransition from '$lib/components/PageTransition.svelte';
 	import '../styles/global.css';
 
 	let { children } = $props();
@@ -15,6 +17,18 @@
 
 	// Setup Convex
 	setupConvex(CONVEX_URL);
+
+	// Enable View Transitions API for modern browsers
+	onNavigate((navigation) => {
+		if (!document.startViewTransition) return;
+
+		return new Promise((resolve) => {
+			document.startViewTransition(async () => {
+				resolve();
+				await navigation.complete;
+			});
+		});
+	});
 
 	// Page tracking
 	let tracker: ReturnType<typeof createPageTracker> | null = null;
@@ -61,5 +75,7 @@
 </script>
 
 <Layout>
-	{@render children()}
+	<PageTransition>
+		{@render children()}
+	</PageTransition>
 </Layout>
