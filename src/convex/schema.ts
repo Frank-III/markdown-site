@@ -100,4 +100,27 @@ export default defineSchema({
     confirmed: v.boolean(),
   })
     .index("by_email", ["email"]),
+
+  // Inline highlights/annotations on post content
+  highlights: defineTable({
+    slug: v.string(),
+    text: v.string(),
+    comment: v.string(),
+    author: v.string(),
+    startOffset: v.number(),
+    endOffset: v.number(),
+    sessionId: v.string(),
+    timestamp: v.number(),
+  })
+    .index("by_slug", ["slug"])
+    .index("by_session", ["sessionId"]),
+
+  // Share counts for posts
+  shareCounts: defineTable({
+    slug: v.string(),
+    platform: v.string(), // "copy" | "twitter" | "total"
+    count: v.number(),
+  })
+    .index("by_slug", ["slug"])
+    .index("by_slug_platform", ["slug", "platform"]),
 });

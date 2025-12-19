@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { useQuery } from 'convex-svelte';
+	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
 	import BlogPost from '$lib/components/BlogPost.svelte';
 	import CopyPageDropdown from '$lib/components/CopyPageDropdown.svelte';
@@ -12,18 +12,24 @@
 	import RelatedPosts from '$lib/components/RelatedPosts.svelte';
 	import Comments from '$lib/components/Comments.svelte';
 	import Newsletter from '$lib/components/Newsletter.svelte';
+	import InlineComments from '$lib/components/InlineComments.svelte';
+	import ImageLightbox from '$lib/components/ImageLightbox.svelte';
+	import KeyboardNav from '$lib/components/KeyboardNav.svelte';
+	import ScrollPosition from '$lib/components/ScrollPosition.svelte';
 	import { format, parseISO } from 'date-fns';
-	import { ArrowLeft, Link as LinkIcon, Twitter, Rss } from 'lucide-svelte';
+	import { ArrowLeft, Link as LinkIcon, Twitter, Rss, Share2 } from 'lucide-svelte';
 	import { browser } from '$app/environment';
 
 	const SITE_URL = 'https://markdowncms.netlify.app';
 	const SITE_NAME = 'Markdown Site';
 
 	const slug = $derived($page.params.slug);
+	const client = useConvexClient();
 
 	// Query page first, then post
 	const pageData = useQuery(api.pages.getPageBySlug, () => ({ slug }));
 	const postData = useQuery(api.posts.getPostBySlug, () => ({ slug }));
+	const shareCounts = useQuery(api.shares.getShareCounts, () => ({ slug }));
 
 	let copied = $state(false);
 
@@ -36,14 +42,18 @@
 			await navigator.clipboard.writeText(window.location.href);
 			copied = true;
 			setTimeout(() => (copied = false), 2000);
+			// Track share
+			await client.mutation(api.shares.incrementShare, { slug, platform: 'copy' });
 		}
 	}
 
-	function handleShareTwitter() {
+	async function handleShareTwitter() {
 		if (browser && postData.data) {
 			const text = encodeURIComponent(postData.data.title);
 			const url = encodeURIComponent(window.location.href);
 			window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+			// Track share
+			await client.mutation(api.shares.incrementShare, { slug, platform: 'twitter' });
 		}
 	}
 
@@ -129,6 +139,12 @@
 				<Reactions {slug} />
 
 				<div class="post-share">
+					{#if shareCounts.data && shareCounts.data.total > 0}
+						<div class="share-count">
+							<Share2 size={14} />
+							<span>{shareCounts.data.total} share{shareCounts.data.total !== 1 ? 's' : ''}</span>
+						</div>
+					{/if}
 					<button onclick={handleCopyLink} class="share-button" aria-label="Copy link">
 						<LinkIcon size={16} />
 						<span>{copied ? 'Copied!' : 'Copy link'}</span>
@@ -158,10 +174,16 @@
 				{/if}
 			</footer>
 
+			<InlineComments {slug} />
 			<RelatedPosts {slug} />
 			<Newsletter />
 			<Comments {slug} />
 		</article>
+
+		<!-- Global components -->
+		<ImageLightbox />
+		<KeyboardNav currentSlug={slug} />
+		<ScrollPosition />
 	</div>
 {:else}
 	<!-- Not found -->
