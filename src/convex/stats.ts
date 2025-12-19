@@ -228,6 +228,30 @@ export const getStats = query({
  * Internal mutation to clean up stale sessions.
  * Called by cron job every 5 minutes.
  */
+/**
+ * Get active readers count for a specific path.
+ * Real-time subscription for showing "X people reading this".
+ */
+export const getActiveReadersForPath = query({
+  args: {
+    path: v.string(),
+  },
+  returns: v.number(),
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    const sessionCutoff = now - SESSION_TIMEOUT_MS;
+
+    // Get active sessions on this path
+    const activeSessions = await ctx.db
+      .query("activeSessions")
+      .withIndex("by_lastSeen", (q) => q.gt("lastSeen", sessionCutoff))
+      .collect();
+
+    // Count sessions on this specific path
+    return activeSessions.filter((s) => s.currentPath === args.path).length;
+  },
+});
+
 export const cleanupStaleSessions = internalMutation({
   args: {},
   returns: v.number(),

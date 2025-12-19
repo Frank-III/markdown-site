@@ -5,6 +5,9 @@
 	import { api } from '$convex/_generated/api';
 	import BlogPost from '$lib/components/BlogPost.svelte';
 	import CopyPageDropdown from '$lib/components/CopyPageDropdown.svelte';
+	import LiveReaders from '$lib/components/LiveReaders.svelte';
+	import TableOfContents from '$lib/components/TableOfContents.svelte';
+	import ReadingProgress from '$lib/components/ReadingProgress.svelte';
 	import { format, parseISO } from 'date-fns';
 	import { ArrowLeft, Link as LinkIcon, Twitter, Rss } from 'lucide-svelte';
 	import { browser } from '$app/environment';
@@ -82,6 +85,7 @@
 	</div>
 {:else if postData.data}
 	<!-- Blog post -->
+	<ReadingProgress />
 	<div class="post-page">
 		<nav class="post-nav">
 			<button onclick={handleBack} class="back-button">
@@ -110,7 +114,10 @@
 				{#if postData.data.description}
 					<p class="post-description">{postData.data.description}</p>
 				{/if}
+				<LiveReaders path="/{slug}" />
 			</header>
+
+			<TableOfContents content={postData.data.content} />
 
 			<BlogPost content={postData.data.content} />
 
