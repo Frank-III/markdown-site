@@ -282,3 +282,142 @@ export const getViewCount = query({
     return viewCount?.count ?? 0;
   },
 });
+
+// Get related posts by tags
+export const getRelatedPosts = query({
+  args: {
+    slug: v.string(),
+    limit: v.optional(v.number()),
+  },
+  returns: v.array(
+    v.object({
+      _id: v.id("posts"),
+      slug: v.string(),
+      title: v.string(),
+      description: v.string(),
+      date: v.string(),
+      tags: v.array(v.string()),
+    })
+  ),
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 3;
+
+    // Get current post
+    const currentPost = await ctx.db
+      .query("posts")
+      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
+      .first();
+
+    if (!currentPost || !currentPost.tags.length) {
+      return [];
+    }
+
+    // Get all published posts
+    const allPosts = await ctx.db
+      .query("posts")
+      .withIndex("by_published", (q) => q.eq("published", true))
+      .collect();
+
+    // Score posts by tag overlap
+    const scoredPosts = allPosts
+      .filter((p) => p.slug !== args.slug)
+      .map((post) => {
+        const commonTags = post.tags.filter((tag) =>
+          currentPost.tags.includes(tag)
+        );
+        return { post, score: commonTags.length };
+      })
+      .filter((p) => p.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit);
+
+    return scoredPosts.map((p) => ({
+      _id: p.post._id,
+      slug: p.post.slug,
+      title: p.post.title,
+      description: p.post.description,
+      date: p.post.date,
+      tags: p.post.tags,
+    }));
+  },
+});
+
+// Get post by slug including drafts (for preview mode)
+export const getPostBySlugPreview = query({
+  args: {
+    slug: v.string(),
+  },
+  returns: v.union(
+    v.object({
+      _id: v.id("posts"),
+      _creationTime: v.number(),
+      slug: v.string(),
+      title: v.string(),
+      description: v.string(),
+      content: v.string(),
+      date: v.string(),
+      published: v.boolean(),
+      tags: v.array(v.string()),
+      readTime: v.optional(v.string()),
+      image: v.optional(v.string()),
+    }),
+    v.null()
+  ),
+  handler: async (ctx, args) => {
+    const post = await ctx.db
+      .query("posts")
+      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
+      .first();
+
+    if (!post) {
+      return null;
+    }
+
+    return {
+      _id: post._id,
+      _creationTime: post._creationTime,
+      slug: post.slug,
+      title: post.title,
+      description: post.description,
+      content: post.content,
+      date: post.date,
+      published: post.published,
+      tags: post.tags,
+      readTime: post.readTime,
+      image: post.image,
+    };
+  },
+});
+
+// Get all posts including drafts (for preview mode)
+export const getAllPostsWithDrafts = query({
+  args: {},
+  returns: v.array(
+    v.object({
+      _id: v.id("posts"),
+      slug: v.string(),
+      title: v.string(),
+      description: v.string(),
+      date: v.string(),
+      published: v.boolean(),
+      tags: v.array(v.string()),
+      readTime: v.optional(v.string()),
+    })
+  ),
+  handler: async (ctx) => {
+    const posts = await ctx.db.query("posts").collect();
+
+    return posts
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .map((post) => ({
+        _id: post._id,
+        slug: post.slug,
+        title: post.title,
+        description: post.description,
+        date: post.date,
+        published: post.published,
+        tags: post.tags,
+        readTime: post.readTime,
+      }));
+  },
+});

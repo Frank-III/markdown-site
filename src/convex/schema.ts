@@ -70,4 +70,34 @@ export default defineSchema({
   })
     .index("by_sessionId", ["sessionId"])
     .index("by_lastSeen", ["lastSeen"]),
+
+  // Reactions for posts (emoji reactions)
+  reactions: defineTable({
+    slug: v.string(),
+    emoji: v.string(), // "👍" | "🔥" | "💡" | "❤️" | "🎉"
+    sessionId: v.string(),
+    timestamp: v.number(),
+  })
+    .index("by_slug", ["slug"])
+    .index("by_slug_emoji", ["slug", "emoji"])
+    .index("by_session_slug", ["sessionId", "slug"]),
+
+  // Comments for posts
+  comments: defineTable({
+    slug: v.string(),
+    author: v.string(),
+    content: v.string(),
+    timestamp: v.number(),
+    sessionId: v.string(),
+  })
+    .index("by_slug", ["slug"])
+    .index("by_timestamp", ["timestamp"]),
+
+  // Newsletter subscribers
+  subscribers: defineTable({
+    email: v.string(),
+    subscribedAt: v.number(),
+    confirmed: v.boolean(),
+  })
+    .index("by_email", ["email"]),
 });

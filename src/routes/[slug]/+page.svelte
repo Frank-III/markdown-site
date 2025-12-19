@@ -8,6 +8,10 @@
 	import LiveReaders from '$lib/components/LiveReaders.svelte';
 	import TableOfContents from '$lib/components/TableOfContents.svelte';
 	import ReadingProgress from '$lib/components/ReadingProgress.svelte';
+	import Reactions from '$lib/components/Reactions.svelte';
+	import RelatedPosts from '$lib/components/RelatedPosts.svelte';
+	import Comments from '$lib/components/Comments.svelte';
+	import Newsletter from '$lib/components/Newsletter.svelte';
 	import { format, parseISO } from 'date-fns';
 	import { ArrowLeft, Link as LinkIcon, Twitter, Rss } from 'lucide-svelte';
 	import { browser } from '$app/environment';
@@ -122,6 +126,8 @@
 			<BlogPost content={postData.data.content} />
 
 			<footer class="post-footer">
+				<Reactions {slug} />
+
 				<div class="post-share">
 					<button onclick={handleCopyLink} class="share-button" aria-label="Copy link">
 						<LinkIcon size={16} />
@@ -151,6 +157,10 @@
 					</div>
 				{/if}
 			</footer>
+
+			<RelatedPosts {slug} />
+			<Newsletter />
+			<Comments {slug} />
 		</article>
 	</div>
 {:else}

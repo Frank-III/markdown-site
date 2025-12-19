@@ -2,6 +2,7 @@
 	import { useQuery } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
 	import ThemeToggle from './ThemeToggle.svelte';
+	import Search from './Search.svelte';
 
 	let { children } = $props();
 
@@ -21,8 +22,9 @@
 				{/each}
 			</nav>
 		{/if}
-		<!-- Theme toggle -->
-		<div class="theme-toggle-container">
+		<!-- Search and Theme toggle -->
+		<div class="nav-actions">
+			<Search />
 			<ThemeToggle />
 		</div>
 	</div>
@@ -30,3 +32,11 @@
 		{@render children()}
 	</main>
 </div>
+
+<style>
+	.nav-actions {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+</style>
